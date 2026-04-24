@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Connection Test ---
+    match /test/connection {
+      allow get: if isSignedIn();
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Collections ---
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) 
+                    && incoming().uid == request.auth.uid
+                    && incoming().email == request.auth.token.email
+                    && incoming().keys().hasAll(['uid', 'email', 'createdAt'])
+                    && incoming().createdAt == request.time;
+      allow update: if isOwner(userId)
+                    && incoming().uid == existing().uid
+                    && incoming().email == existing().email
+                    && (
+                      incoming().diff(existing()).affectedKeys().hasAny(['niche', 'lastActive', 'credits', 'settings'])
+                    );
+    }
+
+    // 2. Assets Subcollection
+    match /users/{userId}/assets/{assetId} {
+      allow list, get: if isOwner(userId);
+      allow create: if isOwner(userId)
+                    && isValidId(assetId)
+                    && incoming().authorId == request.auth.uid
+                    && incoming().keys().hasAll(['authorId', 'type', 'content', 'timestamp'])
+                    && incoming().timestamp == request.time;
+      allow update: if isOwner(userId)
+                    && incoming().authorId == existing().authorId
+                    && (
+                      incoming().diff(existing()).affectedKeys().hasOnly(['feedback'])
+                      && incoming().feedback in ['good', 'bad', 'none']
+                    );
+      allow delete: if isOwner(userId);
+    }
+    // 3. Interactions Collection (Logging)
+    match /interactions/{id} {
+      allow create: if isSignedIn() 
+                    && incoming().userId == request.auth.uid
+                    && incoming().timestamp == request.time;
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

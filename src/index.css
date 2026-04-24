@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Orbitron", sans-serif;
+  --font-sans: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-vy-bg: #03050a;
+  --color-vy-surface: #080d18;
+  --color-vy-surface2: #0d1525;
+  --color-vy-border: rgba(255,255,255,0.06);
+  --color-vy-border-bright: rgba(255,255,255,0.14);
+  --color-vy-accent: #e8542a;
+  --color-vy-accent2: #f59e0b;
+  --color-vy-cyan: #00c8ff;
+  --color-vy-green: #22d3a0;
+  --color-vy-violet: #8b5cf6;
+  --color-vy-muted: #4a6070;
+  --color-vy-text: #c8dce8;
+  --color-vy-white: #f0f6ff;
+}
+
+@layer base {
+  body {
+    @apply bg-vy-bg text-vy-text font-sans antialiased overflow-hidden selection:bg-vy-accent/30;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-vy-border-bright rounded-full hover:bg-vy-accent/50 transition-colors;
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.scanner-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-vy-cyan), transparent);
+  box-shadow: 0 0 15px var(--color-vy-cyan);
+  animation: scan 2s linear infinite;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.4s ease forwards;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(34, 211, 160, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(34, 211, 160, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 160, 0); }
+}
+
+@keyframes orbit-focus {
+  0%, 100% { border-color: var(--color-vy-accent); box-shadow: 0 0 15px rgba(232, 84, 42, 0.2); }
+  50% { border-color: var(--color-vy-cyan); box-shadow: 0 0 15px rgba(0, 200, 255, 0.2); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.shimmer-card {
+  @apply relative overflow-hidden;
+}
+
+.shimmer-card::before {
+  content: "";
+  @apply absolute inset-0 z-10;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+.animate-orbit-focus {
+  animation: orbit-focus 3s infinite;
+}
+
+.pulse-dot {
+  @apply w-2 h-2 rounded-full bg-vy-green;
+  animation: pulse-glow 2s infinite;
+}
+

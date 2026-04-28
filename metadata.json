@@ -1,0 +1,9 @@
+{
+  "name": "VYREX",
+  "description": "Ultimate YouTube Intelligence Engine — production-grade AI content strategist.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
